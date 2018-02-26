@@ -1,1 +1,2 @@
-This is a directory to read some code and learn
+This package is to demo how to use mxnet in our own project.
+
