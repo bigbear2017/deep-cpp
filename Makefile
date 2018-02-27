@@ -21,14 +21,22 @@ CPPEX_EXE = $(patsubst %.cpp, %, $(CPPEX_SRC))
 
 CFLAGS += -I./include/nnvm/include -I./include/dmlc-core/include
 CPPEX_CFLAGS += -I./include
+CFLAGS+= `pkg-config --cflags opencv`
+LDFLAGS+=`pkg-config --libs opencv`
+LDFLAGS+= lib/libmxnet.so
 CPPEX_EXTRA_LDFLAGS := -L./lib -lmxnet
 
-.PHONY: all clean
+.PHONY: all image-classification-predict clean
 
 all: $(CPPEX_EXE)
 
 $(CPPEX_EXE):% : %.cpp ./lib/libmxnet.so ./include/mxnet-cpp/*.h
 	$(CXX) -std=c++0x $(CFLAGS) $(CPPEX_CFLAGS) -o $@ $(filter %.cpp %.a, $^) $(CPPEX_EXTRA_LDFLAGS)
 
+image-classification-predict: image-classification-predict.o
+	g++ -O3 -o image-classification-predict image-classification-predict.o $(LDFLAGS)
+
+image-classification-predict.o: image-classification-predict.cpp
+	g++ -O3 $(CPPEX_CFLAGS)  -c image-classification-predict.cpp ${CFLAGS}
 clean:
-	rm -f $(CPPEX_EXE)
+	rm -f $(CPPEX_EXE) *.o
