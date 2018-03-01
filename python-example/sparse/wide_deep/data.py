@@ -80,7 +80,7 @@ def preprocess_uci_adult(data_name):
     age_boundaries = [18, 25, 30, 35, 40, 45, 50, 55, 60, 65]
     # deep columns
     indicator_columns = ['workclass', 'education', 'gender', 'relationship']
-    
+
     embedding_columns = ['native_country', 'occupation']
 
     continuous_columns = ['age', 'education_num', 'capital_gain', 'capital_loss', 'hours_per_week']
@@ -88,7 +88,7 @@ def preprocess_uci_adult(data_name):
     labels = ["<", ">"]
 
     hash_bucket_size = 1000
-    
+
     csr_ncols = len(crossed_columns) * hash_bucket_size
     dns_ncols = len(continuous_columns) + len(embedding_columns)
     for col in indicator_columns:
@@ -100,6 +100,8 @@ def preprocess_uci_adult(data_name):
 
     with open(data_name) as f:
         for row in DictReader(f, fieldnames=csv_columns):
+            if row['income_bracket'] == None:
+                continue
             label_list.append(labels.index(row['income_bracket'].strip()[0]))
 
             for i, cols in enumerate(crossed_columns):
@@ -111,7 +113,7 @@ def preprocess_uci_adult(data_name):
                 else:
                     s = '_'.join([row[col].strip() for col in cols])
                     csr_list.append((i * hash_bucket_size + hash(s) % hash_bucket_size, 1.0))
-            
+
             dns_row = [0] * dns_ncols
             dns_dim = 0
             for col in embedding_columns:
